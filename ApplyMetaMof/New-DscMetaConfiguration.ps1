@@ -36,6 +36,11 @@ function New-DscMetaConfiguration
     $params = $PSBoundParameters
     $params.Remove('Path') | Out-Null
     $params.Remove('Apply') | Out-Null
+    [System.Management.Automation.PSCmdlet]::CommonParameters | % { 
+	if($params.containsKey($_)){
+             $params.remove($_)
+         }
+    }
 
     $metaMofTemplate = @"
 [DSCLocalConfigurationManager()]
@@ -69,7 +74,7 @@ configuration LCMConfig
     }
 
     $metaMof = $metaMofTemplate -replace "$($tabLevelMatch.Matches.Captures.Groups[0].Value)", ($replacementLines -join "`r`n")
-    
+    $metaMof | write-Verbose
     $tempRoot = [IO.Path]::GetTempPath()
     $tempFolder = Get-Date -Format FileDateTime
     $tempPath = Join-Path -Path $tempRoot -ChildPath $tempFolder
